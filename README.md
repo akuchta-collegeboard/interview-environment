@@ -9,7 +9,8 @@ This repo is configured to start a Codespace that's a ready-to-use enviornment.
 3. Dependencies should be automatically installed when environment builds
 4. Port forwarding is already configured.
 5. Run `npm run dev:all` to start the frontend and backend together.
-6. Open the frontend at https://(your workspace name).app.github.dev/
+6. Open the frontend at `https://<your workspace name>-5173.app.github.dev/`
+    * Alternatively: You can find the URL in the "Ports" Tab of VS Code, labeled "frontend" ![Screenshot](./instructions-image.png)
 
 # Getting Started Locally
 This repo has been tested in Codespaces, but should work in a local Linux-based environment with Node v22.16.0.
