@@ -9,11 +9,8 @@
 	// "features": {},
 
 	// Use 'forwardPorts' to make a list of ports inside the container available locally.
-	"forwardPorts": [3001, 5173],
+	"forwardPorts": [5173],
 	"portsAttributes": {
-		"3001": {
-			"label": "backend"
-		},
 		"5173": {
 			"label": "frontend"
 		}
