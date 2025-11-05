@@ -9,6 +9,8 @@ export default defineConfig({
       "/api": "http://localhost:3001"
     }
   },
-  plugins: [react()],
+  plugins: [
+    react()
+  ],
   root: 'frontend'
 })

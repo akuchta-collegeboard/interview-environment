@@ -1,0 +1,123 @@
+// A simplistic sqlite-based database implementation for Tech Assist Portal
+import fs from 'fs';
+import sqlite3 from 'sqlite3'
+import { Database, open } from 'sqlite'
+
+export interface Volunteer {
+    name: string;
+    skills: string[];
+    availability: string[];
+}
+
+export interface Project {
+    name: string;
+    organizationName: string;
+    requiredDays: number;
+    dueDate: Date;
+    skillsNeeded: string[];
+}
+
+function normalizeName(name: string): string {
+    return name.trim().toLowerCase();
+}
+
+function initializeDatabaseSchema(db: Database<sqlite3.Database, sqlite3.Statement>) {
+    console.log("Initializing database schema...");
+    return Promise.all([
+        db.exec(`
+            CREATE TABLE IF NOT EXISTS volunteers (
+                name_as_key TEXT PRIMARY KEY,
+                name TEXT NOT NULL,
+                skills TEXT NOT NULL,
+                availability TEXT NOT NULL
+            )
+        `),
+        db.exec(`
+            CREATE TABLE IF NOT EXISTS projects (
+                name_as_key TEXT PRIMARY KEY,
+                name TEXT NOT NULL,
+                organizationName TEXT NOT NULL,
+                requiredDays INTEGER NOT NULL,
+                dueDate TEXT NOT NULL,
+                skillsNeeded TEXT NOT NULL
+            )
+        `)
+    ]);
+};
+
+export interface TechAssistPortalDatabase {
+    /**
+     * Save a record with volunteer information
+     * name will be normalized into name_as_key for primary key
+     * @param volunteer 
+     */
+    putVolunteer(volunteer: Volunteer): Promise<void>;
+    /**
+     * Get just one volunteer record, name will be normalized for lookup
+     * @param name 
+     */
+    getVolunteer(name: string): Promise<Volunteer | undefined>;
+    /**
+     * Save a record with project information
+     * name will be normalized into name_as_key for primary key
+     * @param project
+     */
+    putProject(project: Project): Promise<void>;
+    /**
+     * Get all project records
+     */
+    getProjects(): Promise<Project[]>;
+}
+
+export async function initializeDatabase(filename: string): Promise<TechAssistPortalDatabase> {
+    // open the database
+    const db = await open({
+        filename: '/tmp/database.db',
+        driver: sqlite3.Database
+    });
+
+    await initializeDatabaseSchema(db);
+
+    const selectVolunteersStmt = await db.prepare('SELECT * FROM volunteers');
+    const selectProjectsStmt = await db.prepare('SELECT * FROM projects');
+    const insertVolunteerStmt = await db.prepare(`
+        INSERT OR REPLACE INTO volunteers (name_as_key, name, skills, availability)
+        VALUES (?, ?, ?, ?)
+    `);
+    const insertProjectStmt = await db.prepare(`
+        INSERT OR REPLACE INTO projects (name_as_key, name, organizationName, requiredDays, dueDate, skillsNeeded)
+        VALUES (?, ?, ?, ?, ?, ?)
+    `);
+
+    return {
+        async putVolunteer(volunteer: Volunteer): Promise<void> {
+            const { name, skills, availability } = volunteer;
+            await insertVolunteerStmt.run(normalizeName(name), name, JSON.stringify(skills), JSON.stringify(availability));
+        },
+        async getVolunteer(name: string): Promise<Volunteer | undefined> {
+            const row = await db.get('SELECT * FROM volunteers WHERE name_as_key = ?', normalizeName(name));
+            if (!row) return undefined;
+            return {
+                name: row.name,
+                skills: JSON.parse(row.skills),
+                availability: JSON.parse(row.availability)
+            };
+        },
+        async putProject(project: Project): Promise<void> {
+            const { name, organizationName, requiredDays, dueDate, skillsNeeded } = project;
+            await insertProjectStmt.run(normalizeName(name), name, organizationName, requiredDays, dueDate.toISOString(), JSON.stringify(skillsNeeded));
+        },
+        async getProjects(): Promise<Project[]> {
+            const projectsRows = await selectProjectsStmt.all();
+            const projects = projectsRows.map((row: any) => ({
+                name: row.name,
+                organizationName: row.organizationName,
+                requiredDays: row.requiredDays,
+                dueDate: new Date(row.dueDate),
+                skillsNeeded: JSON.parse(row.skillsNeeded)
+            }));
+            console.log("Loaded projects:", projects);
+            return projects;
+        }
+    }
+}

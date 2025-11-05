@@ -3,6 +3,25 @@
   height: 100vh;
   background: #f0f2f5;
 }
+nav {
+  background: #ffffff;
+  border-bottom: 1px solid #e0e0e0;
+  flex:auto;
+}
+
+.navbar-items a {
+  margin: 0 15px;
+}
+.navbar-items {
+  display: flex;
+  flex-direction: row;
+}
+
+.navbar-items li {
+  list-style: none;
+  display: block;
+  width: fit-content;
+}
 
 .main-content {
   flex: 1;

@@ -1,20 +1,26 @@
 import express from 'express';
 import cors from 'cors';
+import { initializeDatabase, TechAssistPortalDatabase } from './database';
+import { initializeRoutes } from './routes';
 
 const app = express();
 const PORT = process.env.PORT || 3001;
 
-app.use(cors());
-app.use(express.json());
+async function main() {
+  const db: TechAssistPortalDatabase = await initializeDatabase('tech-assist-portal.db');
+  const router = initializeRoutes(db);
 
-// Health check endpoint - WORKING EXAMPLE FOR CANDIDATES
-app.get('/api/hello-world', (req, res) => {
-    console.log("Hello, World!");
-    res.json({message: "Hello, World!"});
-});
+  app.use(cors());
+  app.use(express.json());
+  app.use('/api', router);
 
-app.listen(PORT, () => {
-  console.log(`Server running on http://localhost:${PORT}`);
-  console.log('Available endpoints:');
-  console.log(`  GET  http://localhost:${PORT}/api/hello-world`);
+  app.listen(PORT, () => {
+    console.log(`Server running on http://localhost:${PORT}`);
+    console.log('Available endpoints:');
+  });
+}
+
+main().catch((err) => {
+  console.error('Failed to start server:', err);
+  process.exit(1);
 });
