@@ -3,6 +3,22 @@ import sqlite3 from 'sqlite3'
 import { Database, open } from 'sqlite'
 import { Project, Volunteer } from './models';
 
+interface VolunteerRow {
+    name_as_key: string;
+    name: string;
+    skills: string; // JSON stringified
+    availability: string; // JSON stringified
+}
+
+interface ProjectRow {
+    name_as_key: string;
+    name: string;
+    organizationName: string;
+    requiredDays: number;
+    dueDate: string; // ISO string
+    skillsNeeded: string; // JSON stringified
+}
+
 function normalizeName(name: string): string {
     return name.trim().toLowerCase();
 }
@@ -95,8 +111,8 @@ export async function initializeDatabase(filename: string): Promise<TechAssistPo
             };
         },
         async getVolunteers(): Promise<Volunteer[]> {
-            const rows = await selectVolunteersStmt.all();
-            return rows.map((row: any) => ({
+            const rows: VolunteerRow[] = await selectVolunteersStmt.all();
+            return rows.map((row: VolunteerRow) => ({
                 name: row.name,
                 skills: JSON.parse(row.skills),
                 availability: JSON.parse(row.availability)
@@ -107,8 +123,8 @@ export async function initializeDatabase(filename: string): Promise<TechAssistPo
             await insertProjectStmt.run(normalizeName(name), name, organizationName, requiredDays, dueDate.toISOString(), JSON.stringify(skillsNeeded));
         },
         async getProjects(): Promise<Project[]> {
-            const projectsRows = await selectProjectsStmt.all();
-            const projects = projectsRows.map((row: any) => ({
+            const projectsRows: ProjectRow[] = await selectProjectsStmt.all();
+            const projects = projectsRows.map((row: ProjectRow) => ({
                 name: row.name,
                 organizationName: row.organizationName,
                 requiredDays: row.requiredDays,

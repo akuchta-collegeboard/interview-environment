@@ -1,4 +1,3 @@
-import { useState } from "react";
 
 function DatePicker(props: { id: string, value: Date, onChange: (date: Date) => void }) {
     return (
