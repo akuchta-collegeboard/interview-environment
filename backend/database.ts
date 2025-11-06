@@ -1,21 +1,7 @@
 // A simplistic sqlite-based database implementation for Tech Assist Portal
-import fs from 'fs';
 import sqlite3 from 'sqlite3'
 import { Database, open } from 'sqlite'
-
-export interface Volunteer {
-    name: string;
-    skills: string[];
-    availability: string[];
-}
-
-export interface Project {
-    name: string;
-    organizationName: string;
-    requiredDays: number;
-    dueDate: Date;
-    skillsNeeded: string[];
-}
+import { Project, Volunteer } from './models';
 
 function normalizeName(name: string): string {
     return name.trim().toLowerCase();
@@ -58,6 +44,11 @@ export interface TechAssistPortalDatabase {
      */
     getVolunteer(name: string): Promise<Volunteer | undefined>;
     /**
+     * Get just one volunteer record, name will be normalized for lookup
+     * @param name 
+     */
+    getVolunteers(): Promise<Volunteer[]>;
+    /**
      * Save a record with project information
      * name will be normalized into name_as_key for primary key
      * @param project
@@ -72,7 +63,7 @@ export interface TechAssistPortalDatabase {
 export async function initializeDatabase(filename: string): Promise<TechAssistPortalDatabase> {
     // open the database
     const db = await open({
-        filename: '/tmp/database.db',
+        filename,
         driver: sqlite3.Database
     });
 
@@ -102,6 +93,14 @@ export async function initializeDatabase(filename: string): Promise<TechAssistPo
                 skills: JSON.parse(row.skills),
                 availability: JSON.parse(row.availability)
             };
+        },
+        async getVolunteers(): Promise<Volunteer[]> {
+            const rows = await selectVolunteersStmt.all();
+            return rows.map((row: any) => ({
+                name: row.name,
+                skills: JSON.parse(row.skills),
+                availability: JSON.parse(row.availability)
+            }));
         },
         async putProject(project: Project): Promise<void> {
             const { name, organizationName, requiredDays, dueDate, skillsNeeded } = project;
