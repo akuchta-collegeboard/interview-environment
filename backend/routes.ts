@@ -9,6 +9,11 @@ export function initializeRoutes(db: TechAssistPortalDatabase): Router {
         res.status(200).send();
     });
 
+    routes.get('/volunteers', async (req, res) => {
+        const volunteers = await db.getVolunteers();
+        res.json(volunteers);
+    });
+
     routes.put('/projects', async (req, res) => {
         const project = req.body;
         project.dueDate = new Date(project.dueDate);
