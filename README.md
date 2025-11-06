@@ -1,5 +1,5 @@
 # interview-environment
-A GitHub codespaces environment for interviewing.
+This is the starting point for a CollegeBoard interview.
 
 # Getting Started w/ GitHub Codespaces(Recommended)
 This repo is configured to start a Codespace that's a ready-to-use enviornment.
@@ -15,12 +15,12 @@ This repo is configured to start a Codespace that's a ready-to-use enviornment.
 # Getting Started Locally
 This repo has been tested in Codespaces, but should work in a local Linux-based environment with Node v22.16.0.
 
-# What's provided, required, optional
-This is a ready-to-use, but minimal, starter to create an Express backend and React; both written in Typescript.
+# Repo Contents
+This repo contains a rudimentary React app for the fictional TechAssist organization. The following basic features have already been implemented:
 
-* You are **required** to use Typescript as implementation language.
-* You are *strongly encouraged* to use React.
-* You may use Express or something else if you choose for backend.
+1. The app has basic navigation using React Router.
+2. The app has a simple database implemented with SQLITE.
+3. Forms to create "Volunteers" and "Projects" exist and are wired up to storage.
 
 ```
 ├── backend # Source code for an Express server
