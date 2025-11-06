@@ -1,23 +1,25 @@
 import React, { useState } from 'react';
-import { Volunteer } from '../../backend/database';
+import { Volunteer } from '../../backend/models';
 import SkillsInput from '../components/SkillsInput';
+import MultiDatePicker from '../components/MultiDatePicker';
 
 export function CreateVolunteerPage() {
     const [formData, setFormData] = useState<Volunteer>({} as Volunteer);
     const [isSubmitted, setIsSubmitted] = useState(false);
+    const [selectedDates, setSelectedDates] = useState<Date[]>([new Date()]);
 
-    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
-        const { name, value } = e.target;
-        setFormData(prev => ({
-            ...prev,
-            [name]: value
-        }));
-    };
+    const onNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        setFormData(prev => ({ ...prev, name: e.target.value }));
+    }
+    const onSkillsChange = (skills: string[]) => setFormData(prev => ({ ...prev, skills }));
+    const onAvailabilityChange = (dates: Date[]) => {
+        setSelectedDates(dates);
+        setFormData(prev => ({ ...prev, availability: dates }));
+    }
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         try {
-            // API call to create Volunteer
             await fetch('/api/volunteers', {
                 method: 'PUT',
                 headers: {
@@ -25,12 +27,10 @@ export function CreateVolunteerPage() {
                 },
                 body: JSON.stringify(formData),
             })
-            setIsSubmitted(true);
             setFormData({} as Volunteer);
+            setIsSubmitted(true);
         } catch (error) {
             console.error('Error creating Volunteer:', error);
-        } finally {
-            
         }
     };
 
@@ -41,15 +41,12 @@ export function CreateVolunteerPage() {
             {!isSubmitted && <form method="post" onSubmit={handleSubmit}>
                 <div>
                     <label htmlFor='name'>Volunteer Name:</label>
-                    <input type='text' name='name' placeholder='Volunteer Name' onChange={handleInputChange}/>
+                    <input type='text' name='name' placeholder='Volunteer Name' required onChange={onNameChange}/>
                 </div>
-                <div>
-                    <label htmlFor='availability'>Available Date:</label>
-                    <input type='date' name='availability' placeholder='Available Date' onChange={handleInputChange}/>
-                </div>
-                <SkillsInput onSkillsChange={(skills) => setFormData(prev => ({ ...prev, skills }))} />
+                <SkillsInput onSkillsChange={onSkillsChange} />
+                <MultiDatePicker selectedDates={selectedDates} onDatesChange={onAvailabilityChange} />
                 <button type="submit">
-                    Create Volunteer
+                    Submit
                 </button>
             </form>}
         </div>

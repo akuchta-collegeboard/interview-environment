@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Project } from '../../backend/database';
+import { Project } from '../../backend/models';
 import SkillsInput from '../components/SkillsInput';
 
 export function CreateProjectPage() {
@@ -29,8 +29,6 @@ export function CreateProjectPage() {
             setFormData({} as Project);
         } catch (error) {
             console.error('Error creating project:', error);
-        } finally {
-            
         }
     };
 
@@ -57,7 +55,7 @@ export function CreateProjectPage() {
                 </div>
                 <SkillsInput onSkillsChange={(skillsNeeded) => setFormData(prev => ({ ...prev, skillsNeeded }))} />
                 <button className="" type="submit">
-                    Create Project
+                    Submit
                 </button>
             </form>}
         </div>

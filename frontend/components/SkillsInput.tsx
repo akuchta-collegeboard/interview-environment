@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 
 interface SkillsInputProps {
-    onSkillsChange?: (skills: string[]) => void;
+    onSkillsChange: (skills: string[]) => void;
 }
 
 export default function SkillsInput({ onSkillsChange }: SkillsInputProps) {
@@ -9,13 +9,15 @@ export default function SkillsInput({ onSkillsChange }: SkillsInputProps) {
 
     const skills = ['frontend', 'backend', 'design', 'product'];
 
-    const handleSkillChange = (skill: string, checked: boolean) => {
-        const updatedSkills = checked
-            ? [...selectedSkills, skill]
-            : selectedSkills.filter(s => s !== skill);
-        
+    const onSkillSelectionChange = (skill: string, checked: boolean) => {
+        let updatedSkills: string[];
+        if (checked) {
+            updatedSkills = [...selectedSkills, skill];
+        } else {
+            updatedSkills = selectedSkills.filter(s => s !== skill);
+        }
         setSelectedSkills(updatedSkills);
-        onSkillsChange?.(updatedSkills);
+        onSkillsChange(updatedSkills);
     };
 
     return (
@@ -27,7 +29,7 @@ export default function SkillsInput({ onSkillsChange }: SkillsInputProps) {
                     <input
                         type="checkbox"
                         checked={selectedSkills.includes(skill)}
-                        onChange={(e) => handleSkillChange(skill, e.target.checked)}
+                        onChange={(e) => onSkillSelectionChange(skill, e.target.checked)}
                     />
                     {skill}
                 </label>
