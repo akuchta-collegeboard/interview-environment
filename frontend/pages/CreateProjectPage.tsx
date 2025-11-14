@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Project } from '../../backend/models';
+import { type Project } from '../../backend/models';
 import SkillsInput from '../components/SkillsInput';
 
 export function CreateProjectPage() {

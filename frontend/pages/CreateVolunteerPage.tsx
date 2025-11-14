@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Volunteer } from '../../backend/models';
+import { type Volunteer } from '../../backend/models';
 import SkillsInput from '../components/SkillsInput';
 import MultiDatePicker from '../components/MultiDatePicker';
 
