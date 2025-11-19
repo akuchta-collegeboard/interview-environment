@@ -1,5 +1,6 @@
 import express from 'express';
 import cors from 'cors';
+import morgan from 'morgan';
 import { initializeDatabase, TechAssistPortalDatabase } from './database';
 import { initializeRoutes } from './routes';
 
@@ -11,16 +12,20 @@ async function main() {
   const router = initializeRoutes(db);
 
   app.use(cors());
+  app.use(morgan('dev'));
   app.use(express.json());
   app.use('/api', router);
+  app.use((err, req, res, next) => {
+    console.error('Unhandled error:', err, err.stack, err.cause);
+    res.status(500).json({ error: 'Internal Server Error' });
+  });
 
   app.listen(PORT, () => {
     console.log(`Server running on http://localhost:${PORT}`);
-    console.log('Available endpoints:');
   });
 }
 
-main().catch((err) => {
-  console.error('Failed to start server:', err);
+main().catch((err: Error) => {
+  console.error('Failed to start server:', err, err.stack, err.cause);
   process.exit(1);
 });
