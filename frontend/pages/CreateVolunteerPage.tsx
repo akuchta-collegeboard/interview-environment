@@ -6,7 +6,7 @@ import MultiDatePicker from '../components/MultiDatePicker';
 export function CreateVolunteerPage() {
     const [formData, setFormData] = useState<Volunteer>({} as Volunteer);
     const [isSubmitted, setIsSubmitted] = useState(false);
-    const [selectedDates, setSelectedDates] = useState<Date[]>([new Date()]);
+    const [selectedDates, setSelectedDates] = useState<Date[]>([]);
 
     const onNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setFormData(prev => ({ ...prev, name: e.target.value }));
