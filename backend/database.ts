@@ -96,43 +96,53 @@ export async function initializeDatabase(filename: string): Promise<TechAssistPo
         VALUES (?, ?, ?, ?, ?, ?)
     `);
 
+    async function putVolunteer(volunteer: Volunteer): Promise<void> {
+        const { name, skills, availability } = volunteer;
+        await insertVolunteerStmt.run(normalizeName(name), name, JSON.stringify(skills), JSON.stringify(availability));
+    }
+
+    async function getVolunteer(name: string): Promise<Volunteer | undefined> {
+        const row = await db.get('SELECT * FROM volunteers WHERE name_as_key = ?', normalizeName(name));
+        if (!row) return undefined;
+        return {
+            name: row.name,
+            skills: JSON.parse(row.skills),
+            availability: JSON.parse(row.availability)
+        };
+    }
+
+    async function getVolunteers(): Promise<Volunteer[]> {
+        const rows: VolunteerRow[] = await selectVolunteersStmt.all();
+        return rows.map((row: VolunteerRow) => ({
+            name: row.name,
+            skills: JSON.parse(row.skills),
+            availability: JSON.parse(row.availability)
+        }));
+    }
+
+    async function putProject(project: Project): Promise<void> {
+        const { name, organizationName, requiredDays, dueDate, skillsNeeded } = project;
+        await insertProjectStmt.run(normalizeName(name), name, organizationName, requiredDays, dueDate.toISOString(), JSON.stringify(skillsNeeded));
+    }
+
+    async function getProjects(): Promise<Project[]> {
+        const projectsRows: ProjectRow[] = await selectProjectsStmt.all();
+        const projects = projectsRows.map((row: ProjectRow) => ({
+            name: row.name,
+            organizationName: row.organizationName,
+            requiredDays: row.requiredDays,
+            dueDate: new Date(row.dueDate),
+            skillsNeeded: JSON.parse(row.skillsNeeded)
+        }));
+        console.log("Loaded projects:", projects);
+        return projects;
+    }
+
     return {
-        async putVolunteer(volunteer: Volunteer): Promise<void> {
-            const { name, skills, availability } = volunteer;
-            await insertVolunteerStmt.run(normalizeName(name), name, JSON.stringify(skills), JSON.stringify(availability));
-        },
-        async getVolunteer(name: string): Promise<Volunteer | undefined> {
-            const row = await db.get('SELECT * FROM volunteers WHERE name_as_key = ?', normalizeName(name));
-            if (!row) return undefined;
-            return {
-                name: row.name,
-                skills: JSON.parse(row.skills),
-                availability: JSON.parse(row.availability)
-            };
-        },
-        async getVolunteers(): Promise<Volunteer[]> {
-            const rows: VolunteerRow[] = await selectVolunteersStmt.all();
-            return rows.map((row: VolunteerRow) => ({
-                name: row.name,
-                skills: JSON.parse(row.skills),
-                availability: JSON.parse(row.availability)
-            }));
-        },
-        async putProject(project: Project): Promise<void> {
-            const { name, organizationName, requiredDays, dueDate, skillsNeeded } = project;
-            await insertProjectStmt.run(normalizeName(name), name, organizationName, requiredDays, dueDate.toISOString(), JSON.stringify(skillsNeeded));
-        },
-        async getProjects(): Promise<Project[]> {
-            const projectsRows: ProjectRow[] = await selectProjectsStmt.all();
-            const projects = projectsRows.map((row: ProjectRow) => ({
-                name: row.name,
-                organizationName: row.organizationName,
-                requiredDays: row.requiredDays,
-                dueDate: new Date(row.dueDate),
-                skillsNeeded: JSON.parse(row.skillsNeeded)
-            }));
-            console.log("Loaded projects:", projects);
-            return projects;
-        }
+        putVolunteer,
+        getVolunteer,
+        getVolunteers,
+        putProject,
+        getProjects
     }
 }
